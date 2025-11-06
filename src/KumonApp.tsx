@@ -1,27 +1,50 @@
-import { useState } from 'react'
 import './App.css'
+import {useEffect, useState} from "react";
+import {openAIToken, openAIUrl} from "./Utils.ts";
+
+
+
+const fetchOpenAI = async (prompt: string, maxTokens: number): Promise<any> => {
+  const response = await fetch(openAIUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${openAIToken}`,
+
+    },
+    body: JSON.stringify({
+      "model": "gpt-4.1",
+      'input': prompt,
+      // max_output_tokens: maxTokens,
+    }),
+  })
+
+  const data = await response.json()
+
+  return data
+}
 
 
 function KumonApp() {
-  const [count, setCount] = useState(0)
+  const [passage, setPassage] = useState<string>();
+  
+  useEffect(() => {
 
+    const d = fetchOpenAI('Generate a Kumon-like Passage about a cat named mittens. Describe a unique adventure that Mittens had.', 10);
+    d.then((data) => {
+      console.log('Response', data)
+      setPassage(data.output[0].content[0].text)
+    });
+  }, [])
   return (
     <>
-      <div>
-        <p>Does the passage go here?</p>
-      </div>
       <h1>PracticeMode</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+      
+      <div>
+        <p className={'big'}>{passage}</p>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+     
+
     </>
   )
 }
